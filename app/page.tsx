@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { motionParticles } from './resultMotionData';
 
@@ -761,10 +761,31 @@ function SharePoster({ onBack }: { onBack: () => void }) {
 
 export default function Home() {
   const reduceMotion = useReducedMotion();
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [canvasScale, setCanvasScale] = useState<number | null>(null);
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupView, setPopupView] = useState<'question' | 'result' | 'detail' | 'share'>('question');
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [question, setQuestion] = useState<string>(questionSuggestions[0]);
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    // Fit the original animation coordinates inside the usable screen area.
+    // ResizeObserver also responds to rotation and mobile browser toolbar changes.
+    const fitCanvas = () => {
+      const { width, height } = viewport.getBoundingClientRect();
+      if (width <= 0 || height <= 0) return;
+      const desktopLimit = width > 600 ? 1 : Infinity;
+      setCanvasScale(Math.min(width / 390, height / 869, desktopLimit));
+    };
+
+    fitCanvas();
+    const observer = new ResizeObserver(fitCanvas);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     [ASSETS.shareScreenPreview, ASSETS.shareScreen].forEach((src) => {
@@ -777,7 +798,15 @@ export default function Home() {
 
   return (
     <main className="page-shell">
-      <section className="home-canvas" aria-label="迅雷浏览器首页动效">
+      <div className="canvas-viewport" ref={viewportRef}>
+      <section
+        className="home-canvas"
+        aria-label="迅雷浏览器首页动效"
+        style={{
+          transform: `scale(${canvasScale ?? 1})`,
+          visibility: canvasScale === null ? 'hidden' : 'visible',
+        }}
+      >
         <div className="background-art" aria-hidden="true">
           <div className="background-base" />
           <img className="background-texture" src={ASSETS.background} alt="" />
@@ -895,6 +924,7 @@ export default function Home() {
           <SharePoster onBack={() => setPopupView('detail')} />
         )}
       </section>
+      </div>
     </main>
   );
 }
