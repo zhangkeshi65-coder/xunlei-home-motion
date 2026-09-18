@@ -1,0 +1,20 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Card Halo Glow" opacity="0" filter="url(#filter0_f_0_1273)" style="mix-blend-mode:screen">
+<ellipse cx="200.535" cy="278.525" rx="200.535" ry="278.525" fill="url(#paint0_radial_0_1273)"/>
+</g>
+<defs>
+<filter id="filter0_f_0_1273" x="inf" y="inf" width="-inf" height="-inf" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="15" result="effect1_foregroundBlur_0_1273"/>
+</filter>
+<radialGradient id="paint0_radial_0_1273" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(200.535 278.525) scale(200.535 278.525)">
+<stop stop-color="#FFEB8C" stop-opacity="0.95"/>
+<stop offset="0.15" stop-color="#FFD959" stop-opacity="0.75"/>
+<stop offset="0.3" stop-color="#FFCC33" stop-opacity="0.5"/>
+<stop offset="0.5" stop-color="#E6B31A" stop-opacity="0.25"/>
+<stop offset="0.7" stop-color="#CC990D" stop-opacity="0.1"/>
+<stop offset="1" stop-color="#B38000" stop-opacity="0"/>
+</radialGradient>
+</defs>
+</svg>

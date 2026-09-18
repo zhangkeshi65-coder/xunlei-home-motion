@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="13.5411" height="13.5411" viewBox="0 0 13.5411 13.5411" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Bokeh Med 14" opacity="0.411962" filter="url(#filter0_f_0_1047)" style="mix-blend-mode:screen">
+<circle cx="6.77057" cy="6.77057" r="3.14341" fill="#F2B31A" fill-opacity="0.976747"/>
+</g>
+<defs>
+<filter id="filter0_f_0_1047" x="0" y="0" width="13.5411" height="13.5411" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1.81358" result="effect1_foregroundBlur_0_1047"/>
+</filter>
+</defs>
+</svg>
