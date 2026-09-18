@@ -1,0 +1,6 @@
+解压后分两次上传：
+1. 打开 01-first-upload，全选里面的文件和文件夹，拖入 GitHub 上传区域，提交。
+2. 打开 02-second-upload，重复上传并提交。
+不要上传 ZIP 或 01/02 外层文件夹。
+完成后仓库首页应直接显示 index.html 和 assets 文件夹。
+Settings > Pages > Deploy from a branch > main > /(root) > Save。
