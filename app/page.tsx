@@ -735,7 +735,6 @@ function SharePoster({ onBack }: { onBack: () => void }) {
         alt="今日抽卡·宝剑骑士分享图"
         onLoad={() => setScreenReady(true)}
       />
-      <img className="share-card-hd" src={ASSETS.shareCardHd} alt="今日抽卡·宝剑骑士" />
       <button className="share-close" type="button" onClick={onBack} aria-label="关闭分享图" />
       <a
         className="share-hit share-save-hit"

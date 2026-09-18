@@ -1316,19 +1316,6 @@ button {
   opacity: 1;
 }
 
-.share-card-hd {
-  position: absolute;
-  z-index: 2;
-  top: 146px;
-  left: 50%;
-  display: block;
-  width: 310px;
-  height: auto;
-  max-width: none;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
 .share-close {
   position: absolute;
   z-index: 4;
