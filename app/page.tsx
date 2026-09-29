@@ -48,6 +48,7 @@ const ASSETS = {
   detailCrown: './assets/detail/section-crown.svg',
   detailDownload: './assets/detail/download.png',
   detailLightOverlay: './assets/detail/top-light.png',
+  detailStatusBar: './assets/detail/status-bar.png',
   shareScreen: './assets/share/screen@3x.png',
 } as const;
 
@@ -213,7 +214,7 @@ function FortunePopup({
   onDraw: () => void;
   reduceMotion: boolean;
   selectedTopic: Topic | null;
-  onSelectTopic: (topic: Topic) => void;
+  onSelectTopic: (topic: Topic | null) => void;
   question: string;
   onQuestionChange: (question: string) => void;
 }) {
@@ -287,7 +288,10 @@ function FortunePopup({
             placeholder={questionSuggestions[questionIndex]}
             autoComplete="off"
             enterKeyHint="done"
-            onChange={(event) => onQuestionChange(event.target.value)}
+            onChange={(event) => {
+              onSelectTopic(null);
+              onQuestionChange(event.target.value);
+            }}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.nativeEvent.isComposing && (question.trim() || selectedTopic)) {
                 event.currentTarget.blur();
@@ -621,11 +625,11 @@ function ResultDetail({
   question: string;
 }) {
   const displayQuestion = question.replace(/^例如：/, '').replace(/[？?]$/, '') || '我今天的运气怎么样';
-  const [questionVisible, setQuestionVisible] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   return (
     <motion.section
-      className={`detail-page${questionVisible ? ' detail-page-scrolled' : ''}`}
+      className={`detail-page${isScrolled ? ' detail-page-scrolled' : ''}`}
       data-node-id="5:3080"
       initial={{ opacity: 0, scale: .985 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -637,7 +641,7 @@ function ResultDetail({
 
       <div
         className="detail-scroll-area"
-        onScroll={(event) => setQuestionVisible(event.currentTarget.scrollTop > 18)}
+        onScroll={(event) => setIsScrolled(event.currentTarget.scrollTop > 18)}
       >
         <div className="detail-scroll-content">
           <div className="detail-side-card detail-side-card-left" aria-hidden="true" />
@@ -669,12 +673,7 @@ function ResultDetail({
         </div>
       </div>
 
-      <div className="detail-status" aria-hidden="true">
-        <strong>9:41</strong>
-        <span className="detail-signal">▮▮▮</span>
-        <span className="detail-wifi">⌁</span>
-        <span className="detail-battery" />
-      </div>
+      <img className="detail-status" src={ASSETS.detailStatusBar} alt="" aria-hidden="true" />
 
       <button className="detail-back" type="button" onClick={onBack} aria-label="返回首页">‹</button>
       <a
@@ -685,8 +684,8 @@ function ResultDetail({
       >
         <img src={ASSETS.detailDownload} alt="" />
       </a>
-      <h1 className={`detail-question${questionVisible ? ' detail-question-visible' : ''}`}>
-        “{displayQuestion}”
+      <h1 className="detail-question" title={displayQuestion}>
+        <span>“{displayQuestion}”</span>
       </h1>
 
       <div className="detail-actions">
