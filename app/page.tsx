@@ -48,9 +48,7 @@ const ASSETS = {
   detailCrown: './assets/detail/section-crown.svg',
   detailDownload: './assets/detail/download.png',
   detailLightOverlay: './assets/detail/light-overlay.png',
-  shareScreen: './assets/share/screen.png',
-  shareScreenPreview: './assets/share/screen-preview.png',
-  shareCardHd: './assets/share/card-hd.png',
+  shareScreen: './assets/share/screen@3x.png',
 } as const;
 
 const sharePulseTransition = {
@@ -227,7 +225,7 @@ function FortunePopup({
       nextIndex = Math.floor(Math.random() * questionSuggestions.length);
     }
     setQuestionIndex(nextIndex);
-    onQuestionChange(questionSuggestions[nextIndex]);
+    onQuestionChange(questionSuggestions[nextIndex].replace(/^例如：/, ''));
   };
 
   const scrimTransition = {
@@ -286,7 +284,16 @@ function FortunePopup({
           <input
             id="fortune-question"
             value={question}
+            placeholder={questionSuggestions[questionIndex]}
+            autoComplete="off"
+            enterKeyHint="done"
             onChange={(event) => onQuestionChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.nativeEvent.isComposing && (question.trim() || selectedTopic)) {
+                event.currentTarget.blur();
+                onDraw();
+              }
+            }}
             aria-label="抽卡问题"
           />
           <button type="button" aria-label="换一个问题" onClick={chooseAnotherQuestion}>
@@ -310,7 +317,7 @@ function FortunePopup({
           ))}
         </div>
 
-        <DrawButton disabled={!selectedTopic} onClick={onDraw} />
+        <DrawButton disabled={!selectedTopic && !question.trim()} onClick={onDraw} />
         <p className="popup-disclaimer">Ai生成内容仅用于娱乐与自我探索</p>
       </motion.section>
     </>
@@ -600,6 +607,10 @@ function ResultPopup({
   );
 }
 
+function SearchIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.8" /><path d="m16 16 4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
+}
+
 function ResultDetail({
   onBack,
   onShare,
@@ -614,7 +625,7 @@ function ResultDetail({
 
   return (
     <motion.section
-      className="detail-page"
+      className={`detail-page${questionVisible ? ' detail-page-scrolled' : ''}`}
       data-node-id="5:3080"
       initial={{ opacity: 0, scale: .985 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -681,9 +692,9 @@ function ResultDetail({
       <div className="detail-actions">
         <div className="detail-suggestions">
           <span className="detail-mini-card"><img src={ASSETS.resultCardFront} alt="" />宝剑骑士卡</span>
-          <button type="button">⌕&nbsp; 深度解读</button>
-          <button type="button">⌕&nbsp; 贵人信号</button>
-          <button type="button">⌕&nbsp; 情感建议</button>
+          <button type="button"><SearchIcon />深度解读</button>
+          <button type="button"><SearchIcon />贵人信号</button>
+          <button type="button"><SearchIcon />情感建议</button>
         </div>
         <div className="detail-main-actions">
           <button type="button">应用该状态</button>
@@ -697,7 +708,39 @@ function ResultDetail({
 
 function SharePoster({ onBack }: { onBack: () => void }) {
   const [screenReady, setScreenReady] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
   const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | undefined;
+    const image = new Image();
+    image.onload = () => {
+      // Export the card at the source's native 3x resolution, without the UI.
+      const canvas = document.createElement('canvas');
+      canvas.width = 840;
+      canvas.height = 1482;
+      const context = canvas.getContext('2d');
+      if (!context) { setImageError(true); return; }
+      context.beginPath();
+      context.roundRect(0, 0, canvas.width, canvas.height, 64);
+      context.clip();
+      context.drawImage(image, 164, 504, 840, 1482, 0, 0, 840, 1482);
+      context.fillStyle = '#111';
+      context.font = '600 36px "PingFang SC", "Microsoft YaHei", sans-serif';
+      context.fillText('迅雷浏览器', 238, 1386);
+      canvas.toBlob((blob) => {
+        if (cancelled) return;
+        if (!blob) { setImageError(true); return; }
+        objectUrl = URL.createObjectURL(blob);
+        setDownloadUrl(objectUrl);
+      }, 'image/png');
+    };
+    image.onerror = () => { if (!cancelled) setImageError(true); };
+    image.src = ASSETS.shareScreen;
+    return () => { cancelled = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, []);
 
   const shareWithFriends = async () => {
     const shareData = {
@@ -728,22 +771,28 @@ function SharePoster({ onBack }: { onBack: () => void }) {
       aria-label="今日灵感卡分享图"
     >
       <button className="share-backdrop" type="button" onClick={onBack} aria-label="返回解读结果" />
-      <img className="share-screen share-screen-preview" src={ASSETS.shareScreenPreview} alt="" />
+      {!screenReady && <p className="share-loading" role="status">{imageError ? '图片加载失败，请关闭后重试' : '正在加载高清分享图…'}</p>}
       <img
         className={`share-screen share-screen-hd${screenReady ? ' share-screen-hd-ready' : ''}`}
         src={ASSETS.shareScreen}
         alt="今日抽卡·宝剑骑士分享图"
         onLoad={() => setScreenReady(true)}
+        onError={() => setImageError(true)}
       />
-      <button className="share-close" type="button" onClick={onBack} aria-label="关闭分享图" />
+      {screenReady && <span className="share-brand" aria-hidden="true">迅雷浏览器</span>}
+      <button className="share-close" type="button" onClick={onBack} aria-label="关闭分享图">×</button>
       <a
         className="share-hit share-save-hit"
-        href={ASSETS.shareCardHd}
+        href={downloadUrl ?? undefined}
+        aria-disabled={!downloadUrl}
+        onClick={(event) => { if (!downloadUrl) event.preventDefault(); }}
         download="今日灵感卡-宝剑骑士.png"
         aria-label="保存图片"
       />
+      {screenReady && !downloadUrl && <p className="share-save-status" role="status">{imageError ? '保存图片准备失败，请关闭后重试' : '正在准备高清图片…'}</p>}
       <motion.button
         className="share-hit share-send-hit"
+        style={{ backgroundImage: `url(${ASSETS.shareScreen})` }}
         data-node-id="5:3543"
         type="button"
         onClick={shareWithFriends}
@@ -766,7 +815,7 @@ export default function Home() {
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupView, setPopupView] = useState<'question' | 'result' | 'detail' | 'share'>('question');
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
-  const [question, setQuestion] = useState<string>(questionSuggestions[0]);
+  const [question, setQuestion] = useState('');
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -788,7 +837,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    [ASSETS.shareScreenPreview, ASSETS.shareScreen].forEach((src) => {
+    [ASSETS.shareScreen].forEach((src) => {
       const image = new Image();
       image.decoding = 'async';
       image.src = src;

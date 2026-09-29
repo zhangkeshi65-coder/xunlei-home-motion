@@ -399,18 +399,20 @@ button {
 
 .question-box input {
   min-width: 0;
+  height: 100%;
   flex: 1;
-  padding: 0 0 0 29px;
+  padding: 0 0 0 18px;
   border: 0;
   outline: 0;
   background: transparent;
-  color: #949494;
-  font-size: 14px;
-  line-height: 20px;
+  color: #111216;
+  font-size: 16px;
+  line-height: 24px;
 }
 
-.question-box input:focus {
-  color: #111216;
+.question-box:focus-within {
+  border-color: #996bff;
+  box-shadow: 0 0 0 2px rgba(153, 107, 255, .15);
 }
 
 .question-box input::placeholder { color: #949494; opacity: 1; }
@@ -848,10 +850,16 @@ button {
   left: 0;
   width: 390px;
   height: 100px;
-  background: linear-gradient(180deg, rgba(239,234,255,.98), rgba(245,242,255,.94));
+  background: linear-gradient(180deg, rgba(239,234,255,.72), rgba(245,242,255,0));
   pointer-events: none;
   content: '';
 }
+
+.detail-page-scrolled::before {
+  background: linear-gradient(180deg, #eee9fb 0%, #f2edfc 85%, rgba(242,237,252,0) 100%);
+}
+
+.detail-page-scrolled .detail-light-overlay { opacity: .35; }
 
 .detail-scroll-area {
   position: absolute;
@@ -883,8 +891,8 @@ button {
   height: 505px;
   max-width: none;
   object-fit: cover;
-  opacity: .16;
-  mix-blend-mode: screen;
+  opacity: .10;
+  mix-blend-mode: soft-light;
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -892,14 +900,15 @@ button {
 .detail-light-overlay {
   position: absolute;
   z-index: 3;
-  top: -116px;
+  top: -175px;
   left: 50%;
   display: block;
-  width: 510px;
+  width: 560px;
   height: auto;
   max-width: none;
-  opacity: .68;
-  mix-blend-mode: screen;
+  opacity: .78;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 64%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 64%, transparent 100%);
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -1129,6 +1138,7 @@ button {
   height: 328px;
   overflow: hidden;
   background: rgba(255,255,255,.92);
+  clip-path: polygon(13px 0, calc(100% - 13px) 0, 100% 13px, 100% calc(100% - 13px), calc(100% - 13px) 100%, 13px 100%, 0 calc(100% - 13px), 0 13px);
 }
 
 .detail-ornate-frame {
@@ -1175,6 +1185,13 @@ button {
   margin: 0 0 10px;
 }
 
+.detail-reading-content p:not(.detail-advice) {
+  text-decoration: underline;
+  text-decoration-color: #b8a1de;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
 .detail-reading-content h2:nth-of-type(2) {
   margin-top: 19px;
   margin-bottom: 8px;
@@ -1202,30 +1219,39 @@ button {
   left: 17px;
   display: flex;
   width: 356px;
-  height: 38px;
+  height: 44px;
   align-items: center;
   gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  touch-action: pan-x;
 }
 
+.detail-suggestions::-webkit-scrollbar { display: none; }
+
 .detail-suggestions button {
-  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
   flex: 0 0 auto;
   padding: 0 10px;
   border: 1px solid #e7e7e7;
   border-radius: 74px;
   background: #fff;
   color: #6b6b6b;
-  font-size: 10px;
-  line-height: 23px;
+  font-size: 14px;
+  line-height: 22px;
   white-space: nowrap;
 }
 
 .detail-mini-card {
   display: flex;
+  flex: 0 0 auto;
   height: 38px;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -1319,10 +1345,6 @@ button {
   pointer-events: none;
 }
 
-.share-screen-preview {
-  filter: none;
-}
-
 .share-screen-hd {
   opacity: 0;
   transition: opacity .12s linear;
@@ -1332,16 +1354,31 @@ button {
   opacity: 1;
 }
 
+.share-brand {
+  position: absolute;
+  z-index: 2;
+  left: 134px;
+  top: 617px;
+  color: #111;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  pointer-events: none;
+}
+
 .share-close {
   position: absolute;
   z-index: 4;
   top: 116px;
   left: 318px;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   background: transparent;
+  color: #fff;
+  font-size: 32px;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -1361,12 +1398,24 @@ button {
 .share-save-hit { left: 54px; }
 .share-send-hit {
   left: 198px;
-  background-image: url('../public/assets/share/screen.png');
   background-position: -198px -674px;
   background-size: 390px 869px;
   transform-origin: center center;
   will-change: transform;
 }
+
+.share-loading,
+.share-save-status {
+  position: absolute;
+  z-index: 4;
+  top: 730px;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+}
+
+.share-loading { top: 400px; }
+.share-save-hit[aria-disabled='true'] { cursor: wait; }
 
 .sr-only {
   position: absolute;
