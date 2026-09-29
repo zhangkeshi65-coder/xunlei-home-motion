@@ -900,13 +900,14 @@ button {
 .detail-light-overlay {
   position: absolute;
   z-index: 3;
-  top: -175px;
+  top: 0;
   left: 50%;
   display: block;
-  width: 560px;
+  width: 505px;
   height: auto;
   max-width: none;
-  opacity: .78;
+  opacity: 1;
+  mix-blend-mode: screen;
   mask-image: linear-gradient(to bottom, #000 0%, #000 64%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 64%, transparent 100%);
   transform: translateX(-50%);

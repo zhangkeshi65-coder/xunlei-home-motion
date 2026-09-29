@@ -47,7 +47,7 @@ const ASSETS = {
   detailBadge: './assets/detail/position-badge.svg',
   detailCrown: './assets/detail/section-crown.svg',
   detailDownload: './assets/detail/download.png',
-  detailLightOverlay: './assets/detail/light-overlay.png',
+  detailLightOverlay: './assets/detail/top-light.png',
   shareScreen: './assets/share/screen@3x.png',
 } as const;
 
