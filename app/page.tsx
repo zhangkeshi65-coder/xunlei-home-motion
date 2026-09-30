@@ -46,9 +46,7 @@ const ASSETS = {
   detailFrame: './assets/detail/ornate-frame.svg',
   detailBadge: './assets/detail/position-badge.svg',
   detailCrown: './assets/detail/section-crown.svg',
-  detailDownload: './assets/detail/download.png',
   detailLightOverlay: './assets/detail/top-light.png',
-  detailStatusBar: './assets/detail/status-bar.png',
   shareScreen: './assets/share/screen@3x.png',
 } as const;
 
@@ -219,6 +217,8 @@ function FortunePopup({
   onQuestionChange: (question: string) => void;
 }) {
   const [questionIndex, setQuestionIndex] = useState(0);
+  const [questionFocused, setQuestionFocused] = useState(false);
+  const topicsDisabled = questionFocused || question.trim().length > 0;
 
   const chooseAnotherQuestion = () => {
     let nextIndex = questionIndex;
@@ -226,6 +226,7 @@ function FortunePopup({
       nextIndex = Math.floor(Math.random() * questionSuggestions.length);
     }
     setQuestionIndex(nextIndex);
+    onSelectTopic(null);
     onQuestionChange(questionSuggestions[nextIndex].replace(/^例如：/, ''));
   };
 
@@ -288,6 +289,11 @@ function FortunePopup({
             placeholder={questionSuggestions[questionIndex]}
             autoComplete="off"
             enterKeyHint="done"
+            onFocus={() => {
+              setQuestionFocused(true);
+              onSelectTopic(null);
+            }}
+            onBlur={() => setQuestionFocused(false)}
             onChange={(event) => {
               onSelectTopic(null);
               onQuestionChange(event.target.value);
@@ -306,13 +312,15 @@ function FortunePopup({
         </div>
 
         <p className="topics-label">热门话题</p>
+        {topicsDisabled && <p className="topics-input-hint" role="status">清空并退出输入后可选话题</p>}
         <div className="topic-grid">
           {topics.map((topic) => (
             <button
-              className={`topic-button${selectedTopic === topic ? ' topic-button-selected' : ''}`}
+              className={`topic-button${!topicsDisabled && selectedTopic === topic ? ' topic-button-selected' : ''}`}
               type="button"
               key={topic}
-              aria-pressed={selectedTopic === topic}
+              disabled={topicsDisabled}
+              aria-pressed={!topicsDisabled && selectedTopic === topic}
               onClick={() => onSelectTopic(topic)}
             >
               <TopicStar />
@@ -615,6 +623,28 @@ function SearchIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.8" /><path d="m16 16 4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
 }
 
+function StatusBar() {
+  return (
+    <svg className="detail-status" viewBox="0 0 390 44" fill="none" aria-hidden="true" focusable="false">
+      <text x="36" y="28" fill="currentColor" fontFamily="-apple-system, BlinkMacSystemFont, Arial, sans-serif" fontSize="15" fontWeight="600">9:41</text>
+      <g fill="currentColor">
+        <rect x="305" y="24" width="3" height="4" rx=".7" />
+        <rect x="310" y="21" width="3" height="7" rx=".7" />
+        <rect x="315" y="18" width="3" height="10" rx=".7" />
+        <rect x="320" y="15" width="3" height="13" rx=".7" />
+      </g>
+      <g stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+        <path d="M328 19.5a11.6 11.6 0 0 1 15 0" />
+        <path d="M331 23a7 7 0 0 1 9 0" />
+        <path d="M334 26.3a2.4 2.4 0 0 1 3 0" />
+      </g>
+      <rect x="351.5" y="17.5" width="22" height="11" rx="2.2" stroke="currentColor" strokeOpacity=".4" />
+      <rect x="353.5" y="19.5" width="18" height="7" rx=".8" fill="currentColor" />
+      <path d="M375 21v4a2.2 2.2 0 0 0 0-4Z" fill="currentColor" fillOpacity=".5" />
+    </svg>
+  );
+}
+
 function ResultDetail({
   onBack,
   onShare,
@@ -673,16 +703,22 @@ function ResultDetail({
         </div>
       </div>
 
-      <img className="detail-status" src={ASSETS.detailStatusBar} alt="" aria-hidden="true" />
+      <StatusBar />
 
-      <button className="detail-back" type="button" onClick={onBack} aria-label="返回首页">‹</button>
+      <button className="detail-back" type="button" onClick={onBack} aria-label="返回首页">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="m15 5-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
       <a
         className="detail-download"
         href={ASSETS.resultCardFront}
         download="今日灵感卡-宝剑骑士.png"
         aria-label="下载宝剑骑士卡片"
       >
-        <img src={ASSETS.detailDownload} alt="" />
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M12 3v12m-4.5-4.5L12 15l4.5-4.5M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </a>
       <h1 className="detail-question" title={displayQuestion}>
         <span>“{displayQuestion}”</span>
