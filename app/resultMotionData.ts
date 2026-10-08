@@ -14,7 +14,7 @@ export type MotionParticle = {
   scaleTimes?: readonly number[];
 };
 
-export const motionParticles = [
+export const motionParticles: readonly MotionParticle[] = [
   {
     "name": "Bokeh Large 0",
     "left": 61.32,

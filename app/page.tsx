@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion, type Transition } from 'motion/react';
 import { motionParticles } from './resultMotionData';
+import { drawTarotCard, EMOTIONS, getReading, type TarotCard } from './tarotData';
+import { createSharePoster } from './sharePoster';
 
 const ASSETS = {
   background: './assets/background.png',
@@ -37,7 +39,6 @@ const ASSETS = {
   popupButtonEdgeLeft: './assets/popup/button-edge-left.svg',
   popupButtonEdgeRight: './assets/popup/button-edge-right.svg',
   resultCard: './assets/result/card.png',
-  resultCardFront: './assets/result/art-original.png',
   resultTopLight: './assets/result/effects/top-light.svg',
   resultCardHalo: './assets/result/effects/card-halo.svg',
   resultTitle: './assets/result/title.svg',
@@ -47,10 +48,9 @@ const ASSETS = {
   detailBadge: './assets/detail/position-badge.svg',
   detailCrown: './assets/detail/section-crown.svg',
   detailLightOverlay: './assets/detail/top-light.png',
-  shareScreen: './assets/share/screen@3x.png',
 } as const;
 
-const sharePulseTransition = {
+const sharePulseTransition: Transition = {
   scaleX: {
     duration: 6.003,
     times: [0, 0.0999, 0.1999, 0.2998, 0.3998, 0.4997, 0.5997, 0.6996, 0.7995, 0.8995, 0.9994, 1],
@@ -63,7 +63,7 @@ const sharePulseTransition = {
     ease: ['easeInOut', 'easeInOut', 'easeInOut', 'easeInOut', 'easeInOut', 'easeInOut', 'easeInOut', 'easeInOut', 'easeInOut', 'easeInOut', 'linear'],
     repeat: Infinity,
   },
-} as const;
+};
 
 const shortcuts = [
   { label: '书签', icon: ASSETS.bookmark },
@@ -77,7 +77,7 @@ const springEase = (t: number) =>
   Math.exp(-t * 7.2105) *
     (Math.cos(t * 20.3943) + 0.3536 * Math.sin(t * 20.3943));
 
-const objectTransition = {
+const objectTransition: Transition = {
   opacity: {
     duration: 1.915,
     times: [0, 0.1243, 0.1883, 1],
@@ -109,9 +109,9 @@ const objectTransition = {
       'linear',
     ],
   },
-} as const;
+};
 
-const magicTransition = {
+const magicTransition: Transition = {
   opacity: {
     duration: 1.915,
     times: [0, 0.4188, 0.4606, 1],
@@ -139,10 +139,16 @@ const magicTransition = {
       'linear',
     ],
   },
-} as const;
+};
 
 const topics = ['考试/学习', '情感/沟通', '求职/实习', '生活/状态'] as const;
 type Topic = (typeof topics)[number];
+const topicQuestions: Record<Topic, string> = {
+  '考试/学习': '现在的学习需要什么提醒？',
+  '情感/沟通': '怎样让关系中的沟通更顺畅？',
+  '求职/实习': '工作与求职的下一步可以怎么做？',
+  '生活/状态': '今天怎样更好地照顾自己的状态？',
+};
 
 const questionSuggestions = [
   '例如：我今天的运气怎么样？',
@@ -230,14 +236,14 @@ function FortunePopup({
     onQuestionChange(questionSuggestions[nextIndex].replace(/^例如：/, ''));
   };
 
-  const scrimTransition = {
+  const scrimTransition: Transition = {
     opacity: {
       duration: 1.915,
       times: [0, 0.2089, 1],
       ease: ['easeOut', 'linear'],
     },
-  } as const;
-  const sheetTransition = {
+  };
+  const sheetTransition: Transition = {
     opacity: {
       duration: 1.915,
       times: [0, 0.1567, 1],
@@ -248,7 +254,7 @@ function FortunePopup({
       times: [0, 0.2611, 1],
       ease: [[0.16, 1, 0.3, 1], 'linear'],
     },
-  } as const;
+  };
 
   return (
     <>
@@ -330,7 +336,7 @@ function FortunePopup({
         </div>
 
         <DrawButton disabled={!selectedTopic && !question.trim()} onClick={onDraw} />
-        <p className="popup-disclaimer">Ai生成内容仅用于娱乐与自我探索</p>
+        <p className="popup-disclaimer">78 张牌随机抽取 · 仅用于娱乐与自我探索</p>
       </motion.section>
     </>
   );
@@ -340,13 +346,13 @@ const resultCards = Array.from({ length: 19 }, (_, index) => index);
 
 const RESULT_DURATION = 4.2;
 
-const resultFadeTransition = {
+const resultFadeTransition: Transition = {
   opacity: {
     duration: RESULT_DURATION,
     times: [0, .1455, .2727, 1],
     ease: ['linear', 'easeOut', 'linear'],
   },
-} as const;
+};
 
 function ResultParticles({ reduceMotion }: { reduceMotion: boolean }) {
   return (
@@ -384,10 +390,12 @@ function ResultPopup({
   onClose,
   onRevealComplete,
   reduceMotion,
+  card,
 }: {
   onClose: () => void;
   onRevealComplete: () => void;
   reduceMotion: boolean;
+  card: TarotCard;
 }) {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(9);
@@ -594,7 +602,7 @@ function ResultPopup({
               clipPath: { duration: RESULT_DURATION, times: [0, .46, .74, 1], ease: ['linear', [.2, 0, .3, 1], 'linear'] },
             }}
           >
-            <img src={ASSETS.resultCardFront} alt="" />
+            <img src={card.image} alt={`${card.name}塔罗牌`} />
           </motion.div>
         </motion.div>
 
@@ -649,13 +657,17 @@ function ResultDetail({
   onBack,
   onShare,
   question,
+  card,
 }: {
   onBack: () => void;
   onShare: () => void;
   question: string;
+  card: TarotCard;
 }) {
   const displayQuestion = question.replace(/^例如：/, '').replace(/[？?]$/, '') || '我今天的运气怎么样';
   const [isScrolled, setIsScrolled] = useState(false);
+  const emotion = EMOTIONS[card.emotion];
+  const reading = getReading(card, question);
 
   return (
     <motion.section
@@ -664,7 +676,7 @@ function ResultDetail({
       initial={{ opacity: 0, scale: .985 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: .36, ease: [0.16, 1, .3, 1] }}
-      aria-label="宝剑骑士解读结果"
+      aria-label={`${card.name}解读结果`}
     >
       <img className="detail-light-texture" src={ASSETS.detailLight} alt="" />
       <img className="detail-light-overlay" src={ASSETS.detailLightOverlay} alt="" aria-hidden="true" />
@@ -678,15 +690,20 @@ function ResultDetail({
           <div className="detail-side-card detail-side-card-right" aria-hidden="true" />
 
           <div className="detail-card-frame">
-            <img src={ASSETS.resultCardFront} alt="宝剑骑士塔罗牌" />
+            <img src={card.image} alt={`${card.name}塔罗牌`} />
           </div>
 
           <div className="detail-card-name">
-            <strong>宝剑骑士</strong>
+            <strong>{card.name}</strong>
             <span className="detail-position">
               <img src={ASSETS.detailBadge} alt="" />
               <em>正位</em>
             </span>
+          </div>
+
+          <div className="detail-emotion" aria-label={`卡牌情绪：${emotion.name}`}>
+            <span style={{ color: emotion.color, background: emotion.background }}>{emotion.name}</span>
+            <small>{card.keywords}</small>
           </div>
 
           <div className="detail-reading">
@@ -694,10 +711,10 @@ function ResultDetail({
             <img className="detail-section-crown" src={ASSETS.detailCrown} alt="" />
             <div className="detail-reading-content">
               <h2>✦ 欧欧解读 ✦</h2>
-              <p>宝剑骑士象征行动、速度、信息与突破。骑士手持宝剑向前冲刺，代表一个充满想法、敢于行动的人，也代表新的消息、交流或机会正在快速到来。</p>
-              <p>这意味着近期你可能会遇到一位推动你前进的人。这个“贵人”可能不是直接给予资源的人，而是通过一次交流、一条信息或一次合作，为你打开新的方向</p>
+              <p>{reading.meaning}</p>
+              <p>{reading.context}</p>
               <h2>✦ 欧欧建议 ✦</h2>
-              <p className="detail-advice">-主动联系一个想认识的人<br />-多参与交流和合作<br />-把自己的想法表达出来</p>
+              <div className="detail-advice">{reading.advice.map(advice => <p key={advice}>· {advice}</p>)}</div>
             </div>
           </div>
         </div>
@@ -712,9 +729,9 @@ function ResultDetail({
       </button>
       <a
         className="detail-download"
-        href={ASSETS.resultCardFront}
-        download="今日灵感卡-宝剑骑士.png"
-        aria-label="下载宝剑骑士卡片"
+        href={card.image}
+        download={`今日灵感卡-${card.name}.png`}
+        aria-label={`下载${card.name}卡片`}
       >
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
           <path d="M12 3v12m-4.5-4.5L12 15l4.5-4.5M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -726,9 +743,9 @@ function ResultDetail({
 
       <div className="detail-actions">
         <div className="detail-suggestions">
-          <span className="detail-mini-card"><img src={ASSETS.resultCardFront} alt="" />宝剑骑士卡</span>
+          <span className="detail-mini-card"><img src={card.image} alt="" />{card.name}卡</span>
           <button type="button"><SearchIcon />深度解读</button>
-          <button type="button"><SearchIcon />贵人信号</button>
+          <button type="button"><SearchIcon />{emotion.name}提醒</button>
           <button type="button"><SearchIcon />情感建议</button>
         </div>
         <div className="detail-main-actions">
@@ -741,49 +758,31 @@ function ResultDetail({
   );
 }
 
-function SharePoster({ onBack }: { onBack: () => void }) {
-  const [screenReady, setScreenReady] = useState(false);
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+function SharePoster({ onBack, card, question }: { onBack: () => void; card: TarotCard; question: string }) {
+  const [poster, setPoster] = useState<{ url: string; blob: Blob } | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [shareStatus, setShareStatus] = useState('');
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     let cancelled = false;
     let objectUrl: string | undefined;
-    const image = new Image();
-    image.onload = () => {
-      // Export the card at the source's native 3x resolution, without the UI.
-      const canvas = document.createElement('canvas');
-      canvas.width = 840;
-      canvas.height = 1482;
-      const context = canvas.getContext('2d');
-      if (!context) { setImageError(true); return; }
-      context.beginPath();
-      context.roundRect(0, 0, canvas.width, canvas.height, 64);
-      context.clip();
-      context.drawImage(image, 164, 504, 840, 1482, 0, 0, 840, 1482);
-      context.fillStyle = '#111';
-      context.font = '600 36px "PingFang SC", "Microsoft YaHei", sans-serif';
-      context.fillText('迅雷浏览器', 238, 1386);
-      canvas.toBlob((blob) => {
-        if (cancelled) return;
-        if (!blob) { setImageError(true); return; }
-        objectUrl = URL.createObjectURL(blob);
-        setDownloadUrl(objectUrl);
-      }, 'image/png');
-    };
-    image.onerror = () => { if (!cancelled) setImageError(true); };
-    image.src = ASSETS.shareScreen;
+    setPoster(null);
+    setImageError(false);
+    void createSharePoster(card, question).then(blob => {
+      if (cancelled) return;
+      objectUrl = URL.createObjectURL(blob);
+      setPoster({ url: objectUrl, blob });
+    }).catch(() => { if (!cancelled) setImageError(true); });
     return () => { cancelled = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, []);
+  }, [card, question]);
 
   const shareWithFriends = async () => {
-    const shareData = {
-      title: '今日灵感卡·宝剑骑士',
-      text: '我的今日灵感卡是宝剑骑士',
-      url: window.location.href,
-    };
-
+    if (!poster) return;
+    const file = new File([poster.blob], `今日灵感卡-${card.name}.png`, { type: 'image/png' });
+    const shareData = navigator.canShare?.({ files: [file] })
+      ? { title: `今日灵感卡·${card.name}`, files: [file] }
+      : { title: `今日灵感卡·${card.name}`, text: `我的今日灵感卡是${card.name} · ${EMOTIONS[card.emotion].name}`, url: window.location.href };
     if (navigator.share) {
       try {
         await navigator.share(shareData);
@@ -792,44 +791,42 @@ function SharePoster({ onBack }: { onBack: () => void }) {
         if (error instanceof DOMException && error.name === 'AbortError') return;
       }
     }
-
-    await navigator.clipboard?.writeText(window.location.href);
+    try {
+      if (!navigator.clipboard) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(window.location.href);
+      setShareStatus('网站链接已复制，也可以保存图片分享');
+    } catch {
+      setShareStatus('请先保存图片，再发送给好友');
+    }
   };
 
   return (
     <motion.section
       className="share-page"
-      data-node-id="5:3171"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: .28, ease: 'easeOut' }}
-      aria-label="今日灵感卡分享图"
+      aria-label={`${card.name}分享图`}
     >
       <button className="share-backdrop" type="button" onClick={onBack} aria-label="返回解读结果" />
-      {!screenReady && <p className="share-loading" role="status">{imageError ? '图片加载失败，请关闭后重试' : '正在加载高清分享图…'}</p>}
-      <img
-        className={`share-screen share-screen-hd${screenReady ? ' share-screen-hd-ready' : ''}`}
-        src={ASSETS.shareScreen}
-        alt="今日抽卡·宝剑骑士分享图"
-        onLoad={() => setScreenReady(true)}
-        onError={() => setImageError(true)}
-      />
-      {screenReady && <span className="share-brand" aria-hidden="true">迅雷浏览器</span>}
+      {!poster && <p className="share-loading" role="status">{imageError ? '图片加载失败，请关闭后重试' : '正在生成高清分享图…'}</p>}
+      {poster && <img className="share-poster" src={poster.url} alt={`今日抽卡·${card.name}·${EMOTIONS[card.emotion].name}分享图`} />}
       <button className="share-close" type="button" onClick={onBack} aria-label="关闭分享图">×</button>
       <a
         className="share-hit share-save-hit"
-        href={downloadUrl ?? undefined}
-        aria-disabled={!downloadUrl}
-        onClick={(event) => { if (!downloadUrl) event.preventDefault(); }}
-        download="今日灵感卡-宝剑骑士.png"
+        href={poster?.url}
+        aria-disabled={!poster}
+        onClick={event => { if (!poster) event.preventDefault(); }}
+        download={`今日灵感卡-${card.name}.png`}
         aria-label="保存图片"
-      />
-      {screenReady && !downloadUrl && <p className="share-save-status" role="status">{imageError ? '保存图片准备失败，请关闭后重试' : '正在准备高清图片…'}</p>}
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" /><circle cx="8" cy="9" r="1.5" fill="currentColor" /><path d="m4 18 5-5 3 3 4-5 5 6" stroke="currentColor" strokeWidth="1.8" /></svg>
+        保存图片
+      </a>
       <motion.button
         className="share-hit share-send-hit"
-        style={{ backgroundImage: `url(${ASSETS.shareScreen})` }}
-        data-node-id="5:3543"
         type="button"
+        disabled={!poster}
         onClick={shareWithFriends}
         aria-label="分享好友"
         initial={{ scaleX: 1, scaleY: 1 }}
@@ -838,7 +835,11 @@ function SharePoster({ onBack }: { onBack: () => void }) {
           scaleY: [1, 1.08, 1, 1.08, 1, 1.08, 1, 1.08, 1, 1.08, 1, 1],
         }}
         transition={reduceMotion ? undefined : sharePulseTransition}
-      />
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 3h7v7M21 3 11 13M10 5H4v16h16v-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        分享好友
+      </motion.button>
+      {shareStatus && <p className="share-save-status" role="status">{shareStatus}</p>}
     </motion.section>
   );
 }
@@ -851,6 +852,8 @@ export default function Home() {
   const [popupView, setPopupView] = useState<'question' | 'result' | 'detail' | 'share'>('question');
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [question, setQuestion] = useState('');
+  const [drawnCard, setDrawnCard] = useState<TarotCard | null>(null);
+  const [drawnQuestion, setDrawnQuestion] = useState('');
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -872,13 +875,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    [ASSETS.shareScreen].forEach((src) => {
-      const image = new Image();
-      image.decoding = 'async';
-      image.src = src;
-      void image.decode().catch(() => undefined);
-    });
-  }, []);
+    if (!drawnCard) return;
+    const image = new Image();
+    image.src = drawnCard.image;
+    void image.decode().catch(() => undefined);
+  }, [drawnCard]);
 
   return (
     <main className="page-shell">
@@ -979,7 +980,12 @@ export default function Home() {
         {popupOpen && popupView === 'question' && (
           <FortunePopup
             onClose={() => setPopupOpen(false)}
-            onDraw={() => setPopupView('result')}
+            onDraw={() => {
+              if (!question.trim() && !selectedTopic) return;
+              setDrawnCard(drawTarotCard());
+              setDrawnQuestion(question.trim() || topicQuestions[selectedTopic!]);
+              setPopupView('result');
+            }}
             reduceMotion={Boolean(reduceMotion)}
             selectedTopic={selectedTopic}
             onSelectTopic={setSelectedTopic}
@@ -987,25 +993,27 @@ export default function Home() {
             onQuestionChange={setQuestion}
           />
         )}
-        {popupOpen && popupView === 'result' && (
+        {popupOpen && popupView === 'result' && drawnCard && (
           <ResultPopup
+            card={drawnCard}
             onClose={() => setPopupOpen(false)}
             onRevealComplete={() => setPopupView('detail')}
             reduceMotion={Boolean(reduceMotion)}
           />
         )}
-        {popupOpen && popupView === 'detail' && (
+        {popupOpen && popupView === 'detail' && drawnCard && (
           <ResultDetail
+            card={drawnCard}
             onShare={() => setPopupView('share')}
-            question={question}
+            question={drawnQuestion}
             onBack={() => {
               setPopupOpen(false);
               setPopupView('question');
             }}
           />
         )}
-        {popupOpen && popupView === 'share' && (
-          <SharePoster onBack={() => setPopupView('detail')} />
+        {popupOpen && popupView === 'share' && drawnCard && (
+          <SharePoster card={drawnCard} question={drawnQuestion} onBack={() => setPopupView('detail')} />
         )}
       </section>
       </div>

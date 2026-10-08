@@ -805,11 +805,11 @@ button {
 
 .result-front-image-wrap img {
   position: absolute;
-  top: -4.29%;
-  left: -5.61%;
+  top: 0;
+  left: 0;
   display: block;
-  width: 111.53%;
-  height: 109.82%;
+  width: 100%;
+  height: 100%;
   max-width: none;
   object-fit: cover;
 }
@@ -903,7 +903,8 @@ button {
 .detail-scroll-content {
   position: relative;
   width: 390px;
-  height: 803px;
+  min-height: 840px;
+  padding: 486px 29px 24px;
 }
 
 .detail-light-texture {
@@ -1045,13 +1046,13 @@ button {
 
 .detail-card-frame img {
   position: absolute;
-  top: -4.29%;
-  left: -5.61%;
+  top: 0;
+  left: 0;
   display: block;
-  width: 111.53%;
-  height: 109.82%;
+  width: 100%;
+  height: 100%;
   max-width: none;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .detail-card-name {
@@ -1071,6 +1072,26 @@ button {
 .detail-card-name strong {
   font-weight: 600;
 }
+
+.detail-emotion {
+  position: absolute;
+  top: 448px;
+  left: 0;
+  width: 390px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.detail-emotion span {
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.detail-emotion small { font-size: 11px; color: #82788f; }
 
 .detail-position {
   position: relative;
@@ -1098,12 +1119,10 @@ button {
 }
 
 .detail-reading {
-  position: absolute;
+  position: relative;
   z-index: 2;
-  top: 454px;
-  left: 29px;
   width: 329px;
-  height: 328px;
+  min-height: 328px;
   overflow: hidden;
   background: rgba(255,255,255,.92);
   clip-path: polygon(13px 0, calc(100% - 13px) 0, 100% 13px, 100% calc(100% - 13px), calc(100% - 13px) 100%, 13px 100%, 0 calc(100% - 13px), 0 13px);
@@ -1129,11 +1148,9 @@ button {
 }
 
 .detail-reading-content {
-  position: absolute;
+  position: relative;
   z-index: 2;
-  top: 19px;
-  left: 18px;
-  width: 293px;
+  padding: 19px 18px 26px;
   color: #000;
   font-size: 12px;
   font-weight: 400;
@@ -1153,7 +1170,7 @@ button {
   margin: 0 0 10px;
 }
 
-.detail-reading-content p:not(.detail-advice) {
+.detail-reading-content > p {
   text-decoration: underline;
   text-decoration-color: #b8a1de;
   text-decoration-thickness: 1px;
@@ -1169,6 +1186,8 @@ button {
   text-align: center;
   line-height: 22px;
 }
+
+.detail-advice p { margin: 0; }
 
 .detail-actions {
   position: absolute;
@@ -1301,44 +1320,23 @@ button {
   cursor: pointer;
 }
 
-.share-screen {
+.share-poster {
   position: absolute;
   z-index: 1;
-  inset: 0;
+  top: 128px;
+  left: 55px;
   display: block;
-  width: 390px;
-  height: 869px;
-  max-width: none;
-  object-fit: cover;
-  pointer-events: none;
-}
-
-.share-screen-hd {
-  opacity: 0;
-  transition: opacity .12s linear;
-}
-
-.share-screen-hd-ready {
-  opacity: 1;
-}
-
-.share-brand {
-  position: absolute;
-  z-index: 2;
-  left: 134px;
-  top: 617px;
-  color: #111;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 16px;
-  pointer-events: none;
+  width: 280px;
+  height: 550px;
+  border-radius: 24px;
+  box-shadow: 0 0 24px rgba(255, 223, 109, .6);
 }
 
 .share-close {
   position: absolute;
   z-index: 4;
-  top: 116px;
-  left: 318px;
+  top: 79px;
+  left: 309px;
   width: 44px;
   height: 44px;
   padding: 0;
@@ -1353,9 +1351,17 @@ button {
 .share-hit {
   position: absolute;
   z-index: 3;
-  top: 674px;
+  top: 700px;
   width: 136px;
-  height: 41px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
   padding: 0;
   border: 0;
   border-radius: 99px;
@@ -1363,11 +1369,12 @@ button {
   cursor: pointer;
 }
 
-.share-save-hit { left: 54px; }
+.share-hit svg { width: 20px; height: 20px; }
+.share-save-hit { left: 54px; background: #090909; }
+.share-hit:disabled { opacity: .5; cursor: wait; }
 .share-send-hit {
   left: 198px;
-  background-position: -198px -674px;
-  background-size: 390px 869px;
+  background: linear-gradient(105deg, #ff691d, #ffa200);
   transform-origin: center center;
   will-change: transform;
 }
@@ -1376,7 +1383,7 @@ button {
 .share-save-status {
   position: absolute;
   z-index: 4;
-  top: 730px;
+  top: 756px;
   width: 100%;
   text-align: center;
   font-size: 14px;
