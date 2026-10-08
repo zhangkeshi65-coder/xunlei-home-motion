@@ -668,6 +668,8 @@ function ResultDetail({
   const [isScrolled, setIsScrolled] = useState(false);
   const emotion = EMOTIONS[card.emotion];
   const reading = getReading(card, question);
+  const searchHref = (suggestion: string) =>
+    `https://www.baidu.com/s?wd=${encodeURIComponent(`${card.name} ${suggestion}`)}`;
 
   return (
     <motion.section
@@ -689,21 +691,23 @@ function ResultDetail({
           <div className="detail-side-card detail-side-card-left" aria-hidden="true" />
           <div className="detail-side-card detail-side-card-right" aria-hidden="true" />
 
-          <div className="detail-card-frame">
-            <img src={card.image} alt={`${card.name}塔罗牌`} />
-          </div>
+          <div className="detail-card-summary">
+            <div className="detail-card-frame">
+              <img src={card.image} alt={`${card.name}塔罗牌`} />
+            </div>
 
-          <div className="detail-card-name">
-            <strong>{card.name}</strong>
-            <span className="detail-position">
-              <img src={ASSETS.detailBadge} alt="" />
-              <em>正位</em>
-            </span>
-          </div>
+            <div className="detail-card-name">
+              <strong>{card.name}</strong>
+              <span className="detail-position">
+                <img src={ASSETS.detailBadge} alt="" />
+                <em>正位</em>
+              </span>
+            </div>
 
-          <div className="detail-emotion" aria-label={`卡牌情绪：${emotion.name}`}>
-            <span style={{ color: emotion.color, background: emotion.background }}>{emotion.name}</span>
-            <small>{card.keywords}</small>
+            <div className="detail-emotion" aria-label={`卡牌情绪：${emotion.name}`}>
+              <span style={{ color: emotion.color, background: emotion.background }}>{emotion.name}</span>
+              <small>{card.keywords}</small>
+            </div>
           </div>
 
           <div className="detail-reading">
@@ -744,9 +748,9 @@ function ResultDetail({
       <div className="detail-actions">
         <div className="detail-suggestions">
           <span className="detail-mini-card"><img src={card.image} alt="" />{card.name}卡</span>
-          <button type="button"><SearchIcon />深度解读</button>
-          <button type="button"><SearchIcon />{emotion.name}提醒</button>
-          <button type="button"><SearchIcon />情感建议</button>
+          <a href={searchHref('深度解读')} target="_blank" rel="noopener noreferrer"><SearchIcon />深度解读</a>
+          <a href={searchHref(`${emotion.name}提醒`)} target="_blank" rel="noopener noreferrer"><SearchIcon />{emotion.name}提醒</a>
+          <a href={searchHref('情感建议')} target="_blank" rel="noopener noreferrer"><SearchIcon />情感建议</a>
         </div>
         <div className="detail-main-actions">
           <button type="button">应用该状态</button>
