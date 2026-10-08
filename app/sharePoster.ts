@@ -78,9 +78,12 @@ export async function createSharePoster(card: TarotCard, question: string): Prom
   ctx.quadraticCurveTo(420, 840, 840, 676);
   ctx.stroke();
 
-  // Clear the old fixed text while keeping the outer frame and curved artwork.
+  // Clear the old fixed text while keeping the original high-resolution footer
+  // mark. The footer mark is part of the source frame and stays sharper than a
+  // redrawn approximation.
   ctx.fillStyle = '#fffefd';
-  ctx.fillRect(22, 805, 796, 626);
+  ctx.fillRect(22, 805, 796, 485);
+  ctx.fillRect(226, 1318, 520, 100);
   ctx.globalAlpha = .12;
   ctx.strokeStyle = '#bca8e6';
   ctx.lineWidth = 2;
@@ -108,8 +111,7 @@ export async function createSharePoster(card: TarotCard, question: string): Prom
   ctx.font = `400 38px ${FONT}`;
   reading.advice.forEach((line, index) => ctx.fillText(`-${line}`, 420, 1064 + index * 70));
 
-  const footerWidth = 188 + 18 + 198;
-  const footerX = (840 - footerWidth) / 2;
+  const footerX = 226;
   ctx.drawImage(brand, footerX, 1350, 188, 35);
   ctx.textAlign = 'left';
   ctx.fillStyle = '#111';

@@ -1041,19 +1041,16 @@ button {
   overflow: hidden;
   border: 0;
   border-radius: 16px;
-  background: rgba(255,255,255,.25);
+  background: rgba(255,255,255,.7);
   box-shadow: 0 1px 12px rgba(122, 91, 205, .1);
 }
 
 .detail-card-frame img {
-  position: absolute;
-  top: -2%;
-  left: -4.5%;
   display: block;
-  width: 109%;
-  height: 104%;
-  max-width: none;
-  object-fit: fill;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 
 .detail-card-name {
@@ -1153,15 +1150,18 @@ button {
   z-index: 2;
   padding: 19px 18px 26px;
   color: #000;
-  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
   font-weight: 400;
-  line-height: 20px;
+  line-height: 22px;
+  letter-spacing: 0;
+  font-synthesis: none;
 }
 
 .detail-reading-content h2 {
   margin: 0 0 11px;
   color: #895eff;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 25px;
   text-align: center;

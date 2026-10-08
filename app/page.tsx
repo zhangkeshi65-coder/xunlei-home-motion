@@ -714,7 +714,7 @@ function ResultDetail({
               <p>{reading.meaning}</p>
               <p>{reading.context}</p>
               <h2>✦ 欧欧建议 ✦</h2>
-              <div className="detail-advice">{reading.advice.map(advice => <p key={advice}>· {advice}</p>)}</div>
+              <div className="detail-advice">{reading.advice.map(advice => <p key={advice}>-{advice}</p>)}</div>
             </div>
           </div>
         </div>
