@@ -64,6 +64,18 @@ export async function createSharePoster(card: TarotCard, question: string): Prom
   drawCover(ctx, image, 42, 44, 756, 720);
   ctx.restore();
 
+  // Cover the original template artwork below the curved window. Without this
+  // layer, details from the template's Knight of Swords can remain visible as
+  // blue strokes between the two gold curves on other cards.
+  ctx.fillStyle = '#fffefd';
+  ctx.beginPath();
+  ctx.moveTo(18, 648);
+  ctx.quadraticCurveTo(420, 850, 822, 648);
+  ctx.lineTo(822, 814);
+  ctx.lineTo(18, 814);
+  ctx.closePath();
+  ctx.fill();
+
   // Rebuild the curved edge on top of the embedded art.
   ctx.strokeStyle = '#e3bd5d';
   ctx.lineWidth = 5;
