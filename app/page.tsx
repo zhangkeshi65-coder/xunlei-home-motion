@@ -668,8 +668,23 @@ function ResultDetail({
   const [isScrolled, setIsScrolled] = useState(false);
   const emotion = EMOTIONS[card.emotion];
   const reading = getReading(card, question);
-  const searchHref = (suggestion: string) =>
-    `https://www.baidu.com/s?wd=${encodeURIComponent(`${card.name} ${suggestion}`)}`;
+  const primaryKeyword = card.keywords.split(' · ')[0];
+  const searchSuggestions = [
+    {
+      label: '深度解读',
+      query: `${card.name} 塔罗牌 正位 ${card.keywords} 深度解读`,
+    },
+    {
+      label: `${emotion.name}提醒`,
+      query: `${card.name} ${emotion.name} ${emotion.description} ${card.keywords} 提醒`,
+    },
+    {
+      label: `${primaryKeyword}建议`,
+      query: `${card.name} ${card.keywords} ${displayQuestion} 建议`,
+    },
+  ];
+  const searchHref = (query: string) =>
+    `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`;
 
   return (
     <motion.section
@@ -748,9 +763,16 @@ function ResultDetail({
       <div className="detail-actions">
         <div className="detail-suggestions">
           <span className="detail-mini-card"><img src={card.image} alt="" />{card.name}卡</span>
-          <a href={searchHref('深度解读')} target="_blank" rel="noopener noreferrer"><SearchIcon />深度解读</a>
-          <a href={searchHref(`${emotion.name}提醒`)} target="_blank" rel="noopener noreferrer"><SearchIcon />{emotion.name}提醒</a>
-          <a href={searchHref('情感建议')} target="_blank" rel="noopener noreferrer"><SearchIcon />情感建议</a>
+          {searchSuggestions.map(suggestion => (
+            <a
+              key={suggestion.label}
+              href={searchHref(suggestion.query)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <SearchIcon />{suggestion.label}
+            </a>
+          ))}
         </div>
         <div className="detail-main-actions">
           <button type="button">应用该状态</button>
